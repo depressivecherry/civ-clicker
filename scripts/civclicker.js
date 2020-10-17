@@ -579,7 +579,8 @@ function onBulkEvent(e) {
 	{
 		case "increment": return onIncrement(e.target);
 		case "purchase" : return onPurchase(e.target);
-		case "raid"     : return onInvade(e.target);
+        case "raid"     : return onInvade(e.target);
+        case "raid-mult": return onInvadeMult(e.target);
 	}
 	return false;
 }
@@ -1338,6 +1339,33 @@ function invade(ecivtype){
 	updatePartyButtons(); 
 }
 function onInvade(control) { return invade(dataset(control,"target")); }
+
+var timesLeft = 0;
+var invadingCiv = null;
+
+function onInvadeMult(control) {
+    var times = dataset(control, "value");
+    console.log('inv mult', times)
+
+    invadingCiv = dataset(control,"target");
+    switch (times.toString()) {
+        case '10': {
+            timesLeft = 10;
+            invade(dataset(control,"target"));
+            break;
+        }
+        case '100': {
+            timesLeft = 100;
+            invade(dataset(control,"target"))
+            break;
+        }
+        case 'inf': {
+            timesLeft = Infinity;
+            invade(dataset(control,"target"))
+            break;
+        }
+    }
+}
 
 function plunder () {
 	var plunderMsg = "";
@@ -2774,6 +2802,23 @@ function doRaid(place, attackerID, defenderID) {
 	doSiege(civData.siege, civData.efort);
 }
 
+function doRaidCheck(place, attackerID, defenderID) {
+    if (curCiv.raid.raiding && curCiv.raid.victory) {
+        var attackers = getCombatants(place, attackerID);
+        if (timesLeft > 0) {
+            plunder(); // plunder resources before new rade
+            console.log(attackers);
+            var troopsCount = attackers.reduce((acc, val) => acc + val.owned, 0);
+            if (troopsCount > 0) { // attack
+                timesLeft -= 1;
+                invade(invadingCiv);
+            }
+        } else {
+            invadingCiv = null;
+        }
+    }
+}
+
 
 function doLabourers() {
 	if (curCiv.curWonder.stage !== 1) { return; }
@@ -3192,7 +3237,8 @@ function gameLoop () {
 	tickGlory();
 	doShades();
 	doEsiege(civData.esiege, civData.fortification);
-	doRaid("party", "player", "enemy");
+    doRaid("party", "player", "enemy");
+    doRaidCheck("party", "player", "enemy");
 
 	//Population-related
 	doGraveyards();

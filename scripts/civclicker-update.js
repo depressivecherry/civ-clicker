@@ -496,9 +496,8 @@ function updateAchievements(){
 function addRaidRows()
 {
 	var s = '';
-	civSizes.forEach(function(elem) { 
-		s += "<button class='raid' data-action='raid' data-target='"+elem.id+"' disabled='disabled'>"+
-		"Raid "+elem.name+"</button>"; //xxxL10N
+	civSizes.forEach(function(elem) {
+        s += UIComponents.raidRow(elem);
 	});
 
 	var group = ui.find("#raidGroup");
@@ -509,7 +508,11 @@ function addRaidRows()
 // Enable the raid buttons for eligible targets.
 function updateTargets(){
 	var i;
-	var raidButtons = document.getElementsByClassName("raid");
+    var raidButtons = document.getElementsByClassName("raid");
+    var raid10Buttons = document.querySelectorAll(".raid-mult.mult-10")
+    var raid100Buttons = document.querySelectorAll(".raid-mult.mult-100")
+    var raidInfButtons = document.querySelectorAll(".raid-mult.mult-inf")
+    
 	var haveArmy = false;
 
 	ui.show("#victoryGroup", curCiv.raid.victory);
@@ -522,9 +525,13 @@ function updateTargets(){
 		var curElem;
 		for(i=0;i<raidButtons.length;++i)
 		{
-			// Disable if we have no standard, no army, or they are too big a target.
+            // Disable if we have no standard, no army, or they are too big a target.
 			curElem = raidButtons[i];
-			curElem.disabled = (!civData.standard.owned||!haveArmy || (civSizes[dataset(curElem,"target")].idx > civSizes[curCiv.raid.targetMax].idx));
+            var isDisabled = (!civData.standard.owned||!haveArmy || (civSizes[dataset(curElem,"target")].idx > civSizes[curCiv.raid.targetMax].idx));
+            curElem.disabled = (isDisabled);
+            raid10Buttons[i].disabled = (isDisabled);
+            raid100Buttons[i].disabled = (isDisabled);
+            raidInfButtons[i].disabled = (isDisabled);
 		}
 	}
 }

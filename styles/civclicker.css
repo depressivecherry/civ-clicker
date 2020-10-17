@@ -793,3 +793,11 @@ footer .title {
 		padding-right: 0;
 	}
 }
+
+.raid {
+    display: inline !important;
+}
+.raid-mult {
+    display: inline !important;
+    min-width: unset !important;
+}
