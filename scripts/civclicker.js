@@ -2782,7 +2782,9 @@ function doRaid(place, attackerID, defenderID) {
 		curCiv.raid.victory = true;  // Flag victory for future handling
 	}
 
-	if (!attackers.length && defenders.length) { // Loss check.
+    if (!attackers.length && defenders.length) { // Loss check.
+        timesLeft = 0;
+        invadingCiv = null;
 		// Slaughter any losing noncombatant units.
 		//xxx Should give throne and corpses for any human ones?
 		unitData.filter(function(elem) { return ((elem.alignment == attackerID) && (elem.place == place)); })
@@ -2807,7 +2809,6 @@ function doRaidCheck(place, attackerID, defenderID) {
         var attackers = getCombatants(place, attackerID);
         if (timesLeft > 0) {
             plunder(); // plunder resources before new rade
-            console.log(attackers);
             var troopsCount = attackers.reduce((acc, val) => acc + val.owned, 0);
             if (troopsCount > 0) { // attack
                 timesLeft -= 1;
