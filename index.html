@@ -469,7 +469,14 @@
 				<!--  -->
 			</span>
 			<div id="conquest">
-				<h3>Army</h3>
+                <h3>Army</h3>
+                <div id="exitRaidLoop">
+                    Raids left:
+                    <span id="raidLoop">
+                        0
+                    </span>
+                    <button onmousedown="breakInvadeLoop()">Exit</button>
+                </div>
 				<p id="customPartyQuantity">
 					Custom Quantity <input id="partyCustomQty" type="number" min="1" step="1" value="1" />
 				</p>
