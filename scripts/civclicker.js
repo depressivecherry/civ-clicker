@@ -76,7 +76,9 @@ var curCiv = {
 
 	raid: {
 		raiding: false, // Are we in a raid right now?
-		victory: false, // Are we in a "raid succeeded" (Plunder-enabled) state right now?
+        victory: false, // Are we in a "raid succeeded" (Plunder-enabled) state right now?
+        left: 0, // how many raids left
+        invadeciv: null,
 		epop: 0,  // Population of enemy we're raiding.
 		plunderLoot: {}, // Loot we get if we win.
 		last: "",
@@ -1340,31 +1342,33 @@ function invade(ecivtype){
 }
 function onInvade(control) { return invade(dataset(control,"target")); }
 
-var timesLeft = 0;
-var invadingCiv = null;
-
 function onInvadeMult(control) {
     var times = dataset(control, "value");
     console.log('inv mult', times)
 
-    invadingCiv = dataset(control,"target");
+    curCiv.raid.invadeciv = dataset(control,"target");
     switch (times.toString()) {
         case '10': {
-            timesLeft = 10;
+            curCiv.raid.left = 10;
             invade(dataset(control,"target"));
             break;
         }
         case '100': {
-            timesLeft = 100;
+            curCiv.raid.left = 100;
             invade(dataset(control,"target"))
             break;
         }
         case 'inf': {
-            timesLeft = Infinity;
+            curCiv.raid.left = Infinity;
             invade(dataset(control,"target"))
             break;
         }
     }
+}
+
+function breakInvadeLoop() {
+    curCiv.raid.left = 0;
+    curCiv.raid.invadeciv = null;
 }
 
 function plunder () {
@@ -2783,8 +2787,8 @@ function doRaid(place, attackerID, defenderID) {
 	}
 
     if (!attackers.length && defenders.length) { // Loss check.
-        timesLeft = 0;
-        invadingCiv = null;
+        curCiv.raid.left = 0;
+        curCiv.raid.invadeciv = null;
 		// Slaughter any losing noncombatant units.
 		//xxx Should give throne and corpses for any human ones?
 		unitData.filter(function(elem) { return ((elem.alignment == attackerID) && (elem.place == place)); })
@@ -2807,15 +2811,15 @@ function doRaid(place, attackerID, defenderID) {
 function doRaidCheck(place, attackerID, defenderID) {
     if (curCiv.raid.raiding && curCiv.raid.victory) {
         var attackers = getCombatants(place, attackerID);
-        if (timesLeft > 0) {
+        if (curCiv.raid.left > 0) {
             plunder(); // plunder resources before new rade
             var troopsCount = attackers.reduce((acc, val) => acc + val.owned, 0);
             if (troopsCount > 0) { // attack
-                timesLeft -= 1;
-                invade(invadingCiv);
+                curCiv.raid.left -= 1;
+                invade(curCiv.raid.invadeciv);
             }
         } else {
-            invadingCiv = null;
+            curCiv.raid.invadeciv = null;
         }
     }
 }

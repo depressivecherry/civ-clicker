@@ -517,7 +517,10 @@ function updateTargets(){
 
 	ui.show("#victoryGroup", curCiv.raid.victory);
 
-	// Raid buttons are only visible when not already raiding.
+    ui.show("#exitRaidLoop", curCiv.raid.left > 0)
+    document.getElementById("raidLoop").innerText = curCiv.raid.left;
+
+    // Raid buttons are only visible when not already raiding.
 	if (ui.show("#raidGroup", !curCiv.raid.raiding))
 	{
 		if (getCombatants("party", "player").length > 0) { haveArmy = true; }
